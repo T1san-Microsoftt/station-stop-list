@@ -3,15 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>停車駅一覧</title>
-
-<!-- Zen Maru Gothic フォント読み込み -->
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
-
 <style>
 body {
   background:#111;
   color:white;
-  font-family: 'Zen Maru Gothic', sans-serif; /* ←ここを変更 */
+  font-family:'Zen Maru Gothic',sans-serif;
   padding:20px;
 }
 
@@ -58,7 +54,7 @@ button{
   position:relative;
 }
 
-/* 中央ライン（始点終点は貫通させない） */
+/* 中央ライン */
 .route::before{
   content:"";
   position:absolute;
@@ -117,7 +113,7 @@ button{
 }
 
 #bottom-space{
-  height:100px; /* 下部余白 */
+  height:150px; /* 下部余白 */
 }
 </style>
 </head>
@@ -137,7 +133,7 @@ button{
     </select>
   </label>
 
-  <label>夏期:
+  <label id="summerLabel">夏期:
     <input type="checkbox" id="summerCheck">
   </label>
 
@@ -153,14 +149,12 @@ button{
 </div>
 
 <div id="errorMsg" class="error"></div>
-
 <div class="route" id="routeDisplay"></div>
-
 <div id="bottom-space"></div>
 
 <script>
 const stations = [
-  {code:"OB-01", jp:"尾羽原", en:"Obahara", types:["Local","Semi","Rapid","RapidExpress","Express","Airport"]},
+  {code:"OB-01", jp:"尾羽原", en:"Obahara", types:["Local","Semi","Rapid","Express","Airport","RapidExpress"]},
   {code:"OB-02", jp:"井口", en:"Iguchi", types:["Local","Semi","Rapid","Express"]},
   {code:"OB-03", jp:"梅郷", en:"Umesato", types:["Local"]},
   {code:"OB-04", jp:"雲中", en:"Kumonaka", types:["Local","Semi","Rapid"]},
@@ -168,7 +162,7 @@ const stations = [
   {code:"OB-05-1", jp:"十川真砂橋", en:"Togawa-Masagobashi", types:["Local"]},
   {code:"OB-06", jp:"千峰", en:"Senpou", types:["Local","Semi"]},
   {code:"OB-07", jp:"南雲谷", en:"Minami-Kumotani", types:["Local"]},
-  {code:"OB-08", jp:"雲谷", en:"Kumotani", types:["Local","Semi","Rapid","Express","RapidExpress"]},
+  {code:"OB-08", jp:"雲谷", en:"Kumotani", types:["Local","Semi","Rapid","Express"]}, // 快急は除外
   {code:"OB-09", jp:"長峰", en:"Nagamine", types:["Local","Semi","Rapid"]},
   {code:"OB-09-1", jp:"西高徳", en:"Nishi-Koutoku", types:["Local","Rapid"]},
   {code:"OB-10", jp:"高徳", en:"Koutoku", types:["Local","Semi","Rapid","Express","Airport","RapidExpress"]},
@@ -187,22 +181,32 @@ const stations = [
   {code:"OB-21", jp:"金田", en:"Kaneda", types:["Local","Semi","Express","RapidExpress"]},
   {code:"OB-22", jp:"百鳥", en:"Hyakutori", types:["Local","Semi","Express","RapidExpress"]},
   {code:"OB-23", jp:"西百鳥", en:"Nishi-Hyakutori", types:["Local","Semi","Rapid"]},
-  {code:"OB-24", jp:"支線尾羽", en:"Branch Line Oba", types:["Local","Semi","Express","RapidExpress"]},
-  {code:"OB-25", jp:"北尾羽", en:"Kita-Oba", types:["Local","Semi","Express","RapidExpress"]},
+  {code:"OB-24", jp:"支線尾羽", en:"Branch Line Oba", types:["Local","Semi","Express","RapidExpress"]}, // 快急は除外
+  {code:"OB-25", jp:"北尾羽", en:"Kita-Oba", types:["Local","Semi","Express","RapidExpress"]}
 ];
+
+const allStartEnd = ["尾羽原","安越","南雲谷","雲谷","高徳","紀田","千鳥","金田","百鳥","北尾羽"];
 
 const startSelect = document.getElementById("startSelect");
 const endSelect = document.getElementById("endSelect");
 const typeSelect = document.getElementById("typeSelect");
 const summerCheck = document.getElementById("summerCheck");
+const summerLabel = document.getElementById("summerLabel");
 const enterBtn = document.getElementById("enterBtn");
 const routeDisplay = document.getElementById("routeDisplay");
 const errorMsg = document.getElementById("errorMsg");
 
-const allStartEnd = ["尾羽原","安越","南雲谷","雲谷","高徳","紀田","千鳥","金田","百鳥","北尾羽"];
-
 function updateStartEndOptions(){
   const type = typeSelect.value;
+
+  // 夏期チェックは急行のみ
+  if(type==="Express"){
+    summerLabel.style.display="inline-block";
+  } else {
+    summerLabel.style.display="none";
+    summerCheck.checked=false;
+  }
+
   startSelect.innerHTML="";
   endSelect.innerHTML="";
   allStartEnd.forEach(s=>{
@@ -212,13 +216,14 @@ function updateStartEndOptions(){
       opt1.value = st.jp;
       opt1.textContent = st.jp;
       startSelect.appendChild(opt1);
+
       const opt2 = document.createElement("option");
       opt2.value = st.jp;
       opt2.textContent = st.jp;
       endSelect.appendChild(opt2);
     }
   });
-  
+
   // 終着制限
   if(type==="Rapid") endSelect.querySelectorAll("option").forEach(o=>{
     if(stations.find(sta=>sta.jp===o.value).code>"OB-16") o.disabled=true;
@@ -229,7 +234,6 @@ function updateStartEndOptions(){
 }
 
 typeSelect.addEventListener("change", updateStartEndOptions);
-summerCheck.addEventListener("change",()=>{routeDisplay.innerHTML="";errorMsg.textContent="";});
 updateStartEndOptions();
 
 enterBtn.addEventListener("click",()=>{
@@ -238,23 +242,40 @@ enterBtn.addEventListener("click",()=>{
   const type = typeSelect.value;
   const start = startSelect.value;
   const end = endSelect.value;
+  const summer = summerCheck.checked;
+
   if(!start || !end){
     errorMsg.textContent="設定が間違っています。やり直してください / Invalid selection";
     return;
   }
+
   const startIndex = stations.findIndex(s=>s.jp===start);
   const endIndex = stations.findIndex(s=>s.jp===end);
   if(startIndex>endIndex){
     errorMsg.textContent="設定が間違っています。やり直してください / Invalid selection";
     return;
   }
-  
-  const summer = summerCheck.checked;
+
+  // 始発・終着が停車駅か確認
+  const startStation = stations[startIndex];
+  const endStation = stations[endIndex];
+  const summerStopCheck = (s)=>s.jp==="舞子台" && summer && type==="Express";
+  if(!startStation.types.includes(type) && !summerStopCheck(startStation)){
+    errorMsg.textContent="設定が間違っています。やり直してください / Invalid selection";
+    return;
+  }
+  if(!endStation.types.includes(type) && !summerStopCheck(endStation)){
+    errorMsg.textContent="設定が間違っています。やり直してください / Invalid selection";
+    return;
+  }
+
   const subStations = stations.slice(startIndex,endIndex+1);
-  
+
   subStations.forEach(s=>{
     let isStop = s.types.includes(type);
     if(s.jp==="舞子台" && summer && type==="Express") isStop=true;
+    // 快速急行は雲谷・支線尾羽止まらない
+    if(type==="RapidExpress" && (s.jp==="雲谷" || s.jp==="支線尾羽")) isStop=false;
     const div = document.createElement("div");
     div.className="station "+(isStop?"stop":"pass");
     div.innerHTML=`<div class="code">${s.code}</div><div class="jp">${s.jp}</div><div class="en">${s.en}</div>`;
