@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>停車駅一覧</title>
+
+<style>
+body{
+  background:#111;
+  color:white;
+  font-family:sans-serif;
+  padding:20px;
+}
+
+/* タイトル */
+h1{
+  color:orange;
+}
+
+/* 種別表示 */
+.display{
+  margin-top:20px;
+  padding:20px;
+  background:black;
+  border:2px solid orange;
+  font-size:26px;
+  text-align:center;
+  border-radius:12px;
+}
+
+/* ===== 縦型路線コンテナ ===== */
+.route{
+  width:260px;
+  margin:50px auto;
+  position:relative;
+}
+
+/* 中央ライン（始点終点は貫通させない） */
+.route::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:80px;
+  bottom:80px;
+  width:6px;
+  background:orange;
+  transform:translateX(-50%);
+  z-index:0;
+}
+
+/* ===== 駅ボックス共通 ===== */
+.station{
+  position:relative;
+  width:220px;
+  height:70px;
+  margin:15px auto;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  font-size:14px;
+  z-index:1;
+}
+
+/* 停車駅 */
+.stop{
+  background:#1e1e1e;
+  border:2px solid orange;
+  color:white;
+}
+
+/* 通過駅 */
+.pass{
+  background:#1a1a1a;
+  border:2px solid #555;
+  color:#aaa;
+  opacity:0.85;
+}
+
+/* 駅コード */
+.code{
+  font-size:12px;
+  opacity:0.8;
+}
+
+/* 日本語 */
+.jp{
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* 英語 */
+.en{
+  font-size:12px;
+  opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<h1>停車駅一覧 / Station Stop List</h1>
+
+<div class="display">
+急行　北尾羽 行<br>
+Express for Kita-Oba
+</div>
+
+<div class="route">
+
+  <!-- 尾羽急本線 -->
+  <div class="station stop"><div class="code">OB-01</div><div class="jp">尾羽原</div><div class="en">Obahara</div></div>
+  <div class="station stop"><div class="code">OB-02</div><div class="jp">井口</div><div class="en">Iguchi</div></div>
+  <div class="station pass"><div class="code">OB-03</div><div class="jp">梅郷</div><div class="en">Umegao</div></div>
+  <div class="station pass"><div class="code">OB-04</div><div class="jp">雲中</div><div class="en">Unchu</div></div>
+  <div class="station stop"><div class="code">OB-05</div><div class="jp">安越</div><div class="en">Yasugoshi</div></div>
+  <div class="station pass"><div class="code">OB-05-1</div><div class="jp">十川真砂橋</div><div class="en">Sogawa-Masagobashi</div></div>
+  <div class="station pass"><div class="code">OB-06</div><div class="jp">千峰</div><div class="en">Senpo</div></div>
+  <div class="station pass"><div class="code">OB-07</div><div class="jp">南雲谷</div><div class="en">Minami-Kumotani</div></div>
+  <div class="station stop"><div class="code">OB-08</div><div class="jp">雲谷</div><div class="en">Kumotani</div></div>
+  <div class="station pass"><div class="code">OB-09</div><div class="jp">長峰</div><div class="en">Nagamini</div></div>
+  <div class="station pass"><div class="code">OB-09-1</div><div class="jp">西高徳</div><div class="en">Nishi-Koutoku</div></div>
+  <div class="station stop"><div class="code">OB-10</div><div class="jp">高徳</div><div class="en">Koutoku</div></div>
+  <div class="station pass"><div class="code">OB-11</div><div class="jp">明神前</div><div class="en">Myojinmae</div></div>
+  <div class="station pass"><div class="code">OB-12</div><div class="jp">舞子台</div><div class="en">Maikodai</div></div>
+  <div class="station stop"><div class="code">OB-13</div><div class="jp">紀田</div><div class="en">Kida</div></div>
+  <div class="station pass"><div class="code">OB-14</div><div class="jp">瀬舞</div><div class="en">Semai</div></div>
+  <div class="station pass"><div class="code">OB-15</div><div class="jp">余美</div><div class="en">Yobi</div></div>
+  <div class="station stop"><div class="code">OB-16</div><div class="jp">千鳥</div><div class="en">Chidori</div></div>
+
+  <!-- 高速線 -->
+  <div class="station pass"><div class="code">OB-17</div><div class="jp">問屋町</div><div class="en">Tonyacho</div></div>
+  <div class="station pass"><div class="code">OB-17-1</div><div class="jp">問屋蔵前</div><div class="en">Tonyakuramae</div></div>
+  <div class="station pass"><div class="code">OB-17-2</div><div class="jp">赤堀大沢</div><div class="en">Akahori-Osawa</div></div>
+  <div class="station stop"><div class="code">OB-18</div><div class="jp">赤堀</div><div class="en">Akahori</div></div>
+  <div class="station stop"><div class="code">OB-19</div><div class="jp">新赤堀</div><div class="en">Shin-Akahori</div></div>
+  <div class="station pass"><div class="code">OB-20</div><div class="jp">塚野</div><div class="en">Tsukano</div></div>
+  <div class="station stop"><div class="code">OB-21</div><div class="jp">金田</div><div class="en">Kaneda</div></div>
+
+  <!-- 支線 -->
+  <div class="station stop"><div class="code">OB-22</div><div class="jp">百鳥</div><div class="en">Momotori</div></div>
+  <div class="station pass"><div class="code">OB-23</div><div class="jp">西百鳥</div><div class="en">Nishi-Momotori</div></div>
+  <div class="station pass"><div class="code">OB-24</div><div class="jp">支線尾羽</div><div class="en">Oba Branch</div></div>
+  <div class="station stop"><div class="code">OB-25</div><div class="jp">北尾羽</div><div class="en">Kita-Oba</div></div>
+
+</div>
+
+</body>
+</html>
