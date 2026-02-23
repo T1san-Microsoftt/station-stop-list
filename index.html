@@ -4,37 +4,51 @@
 <meta charset="UTF-8">
 <title>停車駅一覧</title>
 
+<!-- Zen Maru Gothic フォント読み込み -->
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+
 <style>
-body{
+body {
   background:#111;
   color:white;
-  font-family:sans-serif;
+  font-family: 'Zen Maru Gothic', sans-serif; /* ←ここを変更 */
   padding:20px;
 }
 
+/* タイトル */
 h1{
   color:orange;
-  text-align:center;
 }
 
-.display{
+/* 入力セクション */
+.controls{
   margin-top:20px;
-  padding:20px;
-  background:black;
-  border:2px solid orange;
-  font-size:26px;
-  text-align:center;
-  border-radius:12px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
 }
 
-/* 種別セレクト */
-.select-container{
-  text-align:center;
-  margin:20px 0;
+select, label{
+  font-size:14px;
+  padding:4px 6px;
+  border-radius:6px;
+  border:none;
 }
-.select-container select{
-  font-size:16px;
-  padding:5px 10px;
+
+button{
+  background:orange;
+  border:none;
+  padding:6px 12px;
+  font-weight:bold;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.error{
+  color:red;
+  margin-top:10px;
+  font-weight:bold;
 }
 
 /* ===== 縦型路線コンテナ ===== */
@@ -52,12 +66,12 @@ h1{
   top:80px;
   bottom:80px;
   width:6px;
-  background:orange;
+  background:blue;
   transform:translateX(-50%);
   z-index:0;
 }
 
-/* ===== 駅ボックス共通 ===== */
+/* ===== 駅ボックス ===== */
 .station{
   position:relative;
   width:220px;
@@ -73,155 +87,181 @@ h1{
   z-index:1;
 }
 
-/* 停車駅 */
 .stop{
   background:#1e1e1e;
-  border:2px solid orange;
+  border:2px solid #1ec5ff;
   color:white;
 }
 
-/* 通過駅 */
 .pass{
-  background:#1a1a1a;
+  background:#333;
   border:2px solid #555;
   color:#aaa;
-  opacity:0.85;
+  opacity:0.75;
+  transform:scale(0.75);
 }
 
-/* 駅コード */
 .code{
   font-size:12px;
   opacity:0.8;
 }
 
-/* 日本語 */
 .jp{
   font-weight:bold;
   font-size:16px;
 }
 
-/* 英語 */
 .en{
   font-size:12px;
   opacity:0.9;
 }
+
+#bottom-space{
+  height:100px; /* 下部余白 */
+}
 </style>
 </head>
-
 <body>
 
 <h1>停車駅一覧 / Station Stop List</h1>
 
-<div class="select-container">
-  種別選択：
-  <select id="trainTypeSelect">
-    <option value="Local">各駅停車 / Local</option>
-    <option value="Semi-Express">準急 / Semi-Express</option>
-    <option value="Rapid">快速 / Rapid</option>
-    <option value="Express" selected>急行 / Express</option>
-    <option value="Airport-Express">エアポート急行 / Airport-Express</option>
-    <option value="Rapid-Express">快速急行 / Rapid-Express</option>
-  </select>
+<div class="controls">
+  <label>種別:
+    <select id="typeSelect">
+      <option value="Local">各駅停車</option>
+      <option value="Semi">準急</option>
+      <option value="Rapid">快速</option>
+      <option value="Express">急行</option>
+      <option value="Airport">エアポート急行</option>
+      <option value="RapidExpress">快速急行</option>
+    </select>
+  </label>
+
+  <label>夏期:
+    <input type="checkbox" id="summerCheck">
+  </label>
+
+  <label>始発駅:
+    <select id="startSelect"></select>
+  </label>
+
+  <label>終着駅:
+    <select id="endSelect"></select>
+  </label>
+
+  <button id="enterBtn">確定 / Enter</button>
 </div>
 
-<div class="display" id="displayText">
-Express　北尾羽 行<br>
-Express for Kita-Oba
-</div>
+<div id="errorMsg" class="error"></div>
 
-<div class="route" id="stationRoute">
+<div class="route" id="routeDisplay"></div>
 
-  <!-- 尾羽急本線 -->
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-01</div><div class="jp">尾羽原</div><div class="en">Obahara</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express"><div class="code">OB-02</div><div class="jp">井口</div><div class="en">Iguchi</div></div>
-<div class="station pass" data-types="Local"><div class="code">OB-03</div><div class="jp">梅郷</div><div class="en">Umesato</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid"><div class="code">OB-04</div><div class="jp">雲中</div><div class="en">Kumonaka</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-05</div><div class="jp">安越</div><div class="en">Yasugoshi</div></div>
-<div class="station pass" data-types="Local"><div class="code">OB-05-1</div><div class="jp">十川真砂橋</div><div class="en">Togawa-Masagobashi</div></div>
-<div class="station pass" data-types="Local,Semi-Express"><div class="code">OB-06</div><div class="jp">千峰</div><div class="en">Senpo</div></div>
-<div class="station pass" data-types="Local"><div class="code">OB-07</div><div class="jp">南雲谷</div><div class="en">Minami-Kumotani</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-08</div><div class="jp">雲谷</div><div class="en">Kumotani</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid"><div class="code">OB-09</div><div class="jp">長峰</div><div class="en">Nagamine</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid"><div class="code">OB-09-1</div><div class="jp">西高徳</div><div class="en">Nishi-Koutoku</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-10</div><div class="jp">高徳</div><div class="en">Koutoku</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid"><div class="code">OB-11</div><div class="jp">明神前</div><div class="en">Myoujinmae</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid,Express,Airport-Express"><div class="code">OB-12</div><div class="jp">舞子台</div><div class="en">Maikodai</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Rapid-Express"><div class="code">OB-13</div><div class="jp">紀田</div><div class="en">Kida</div></div>
-<!-- 穂駅追加 -->
-<div class="station stop" data-types="Local,Rapid,Semi-Express"><div class="code">OB-13-1</div><div class="jp">穂</div><div class="en">Ho</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid,Express,Airport-Express"><div class="code">OB-14</div><div class="jp">瀬舞</div><div class="en">Semai</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid,Express,Airport-Express"><div class="code">OB-15</div><div class="jp">余美</div><div class="en">Amarubi</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Rapid-Express"><div class="code">OB-16</div><div class="jp">千鳥</div><div class="en">Chidori</div></div>
-
-<!-- 高速線 -->
-<div class="station pass" data-types="Local,Semi-Express"><div class="code">OB-17</div><div class="jp">問屋町</div><div class="en">Toiya-Machi</div></div>
-<div class="station pass" data-types="Local,Semi-Express"><div class="code">OB-17-1</div><div class="jp">問屋蔵前</div><div class="en">Toiya-Kuramae</div></div>
-<div class="station pass" data-types="Local,Semi-Express"><div class="code">OB-17-2</div><div class="jp">赤堀大沢</div><div class="en">Akahori-Osawa</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-18</div><div class="jp">赤堀</div><div class="en">Akahori</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-19</div><div class="jp">新赤堀</div><div class="en">Shin-Akahori</div></div>
-<div class="station pass" data-types="Local,Semi-Express"><div class="code">OB-20</div><div class="jp">塚野</div><div class="en">Tsukano</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-21</div><div class="jp">金田</div><div class="en">Kaneda</div></div>
-
-<!-- 支線 -->
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-22</div><div class="jp">百鳥</div><div class="en">Hyakutori</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid,Express,Airport-Express"><div class="code">OB-23</div><div class="jp">西百鳥</div><div class="en">Nishi-Hyakutori</div></div>
-<div class="station pass" data-types="Local,Semi-Express,Rapid,Express,Airport-Express"><div class="code">OB-24</div><div class="jp">支線尾羽</div><div class="en">Branch Line Oba</div></div>
-<div class="station stop" data-types="Local,Semi-Express,Rapid,Express,Airport-Express,Rapid-Express"><div class="code">OB-25</div><div class="jp">北尾羽</div><div class="en">Kita-Oba</div></div>
-
-</div>
+<div id="bottom-space"></div>
 
 <script>
-// 種別切り替え
-const select = document.getElementById('trainTypeSelect');
-const display = document.getElementById('displayText');
-const stations = document.querySelectorAll('.station');
+const stations = [
+  {code:"OB-01", jp:"尾羽原", en:"Obahara", types:["Local","Semi","Rapid","RapidExpress","Express","Airport"]},
+  {code:"OB-02", jp:"井口", en:"Iguchi", types:["Local","Semi","Rapid","Express"]},
+  {code:"OB-03", jp:"梅郷", en:"Umesato", types:["Local"]},
+  {code:"OB-04", jp:"雲中", en:"Kumonaka", types:["Local","Semi","Rapid"]},
+  {code:"OB-05", jp:"安越", en:"Yasugoshi", types:["Local","Semi","Rapid","Express","Airport"]},
+  {code:"OB-05-1", jp:"十川真砂橋", en:"Togawa-Masagobashi", types:["Local"]},
+  {code:"OB-06", jp:"千峰", en:"Senpou", types:["Local","Semi"]},
+  {code:"OB-07", jp:"南雲谷", en:"Minami-Kumotani", types:["Local"]},
+  {code:"OB-08", jp:"雲谷", en:"Kumotani", types:["Local","Semi","Rapid","Express","RapidExpress"]},
+  {code:"OB-09", jp:"長峰", en:"Nagamine", types:["Local","Semi","Rapid"]},
+  {code:"OB-09-1", jp:"西高徳", en:"Nishi-Koutoku", types:["Local","Rapid"]},
+  {code:"OB-10", jp:"高徳", en:"Koutoku", types:["Local","Semi","Rapid","Express","Airport","RapidExpress"]},
+  {code:"OB-11", jp:"明神前", en:"Myojin-mae", types:["Local","Rapid"]},
+  {code:"OB-12", jp:"舞子台", en:"Maikodai", types:["Local","Semi","Rapid","Express","RapidExpress","summer"]},
+  {code:"OB-13", jp:"紀田", en:"Kida", types:["Local","Semi","Rapid","Express","RapidExpress"]},
+  {code:"OB-14", jp:"瀬舞", en:"Semai", types:["Local","Rapid","Express"]},
+  {code:"OB-15", jp:"余美", en:"Amarubi", types:["Local","Rapid","Express"]},
+  {code:"OB-16", jp:"千鳥", en:"Chidori", types:["Local","Semi","Rapid","Express","RapidExpress"]},
+  {code:"OB-17", jp:"問屋町", en:"Toiya-Machi", types:["Local","Semi"]},
+  {code:"OB-17-1", jp:"問屋蔵前", en:"Toiya-Kuramae", types:["Local"]},
+  {code:"OB-17-2", jp:"赤堀大沢", en:"Akahori-Osawa", types:["Local"]},
+  {code:"OB-18", jp:"赤堀", en:"Akahori", types:["Local","Semi"]},
+  {code:"OB-19", jp:"新赤堀", en:"Shin-Akahori", types:["Local"]},
+  {code:"OB-20", jp:"塚野", en:"Tsukano", types:["Local"]},
+  {code:"OB-21", jp:"金田", en:"Kaneda", types:["Local","Semi","Express","RapidExpress"]},
+  {code:"OB-22", jp:"百鳥", en:"Hyakutori", types:["Local","Semi","Express","RapidExpress"]},
+  {code:"OB-23", jp:"西百鳥", en:"Nishi-Hyakutori", types:["Local","Semi","Rapid"]},
+  {code:"OB-24", jp:"支線尾羽", en:"Branch Line Oba", types:["Local","Semi","Express","RapidExpress"]},
+  {code:"OB-25", jp:"北尾羽", en:"Kita-Oba", types:["Local","Semi","Express","RapidExpress"]},
+];
 
-const typeJP = {
-  "Local":"各駅停車",
-  "Semi-Express":"準急",
-  "Rapid":"快速",
-  "Express":"急行",
-  "Airport-Express":"エアポート急行",
-  "Rapid-Express":"快速急行"
-};
+const startSelect = document.getElementById("startSelect");
+const endSelect = document.getElementById("endSelect");
+const typeSelect = document.getElementById("typeSelect");
+const summerCheck = document.getElementById("summerCheck");
+const enterBtn = document.getElementById("enterBtn");
+const routeDisplay = document.getElementById("routeDisplay");
+const errorMsg = document.getElementById("errorMsg");
 
-const typeEN = {
-  "Local":"Local",
-  "Semi-Express":"Semi-Express",
-  "Rapid":"Rapid",
-  "Express":"Express",
-  "Airport-Express":"Airport-Express",
-  "Rapid-Express":"Rapid-Express"
-};
+const allStartEnd = ["尾羽原","安越","南雲谷","雲谷","高徳","紀田","千鳥","金田","百鳥","北尾羽"];
 
-select.addEventListener('change',()=>{
-  const type = select.value;
-
-  // 行先英語
-  let endJP = "北尾羽";
-  let endEN = "Kita-Oba";
-
-  if(type=="Airport-Express") endJP = "高徳", endEN="Koutoku";
-  if(type=="Rapid") endJP = "千鳥", endEN="Chidori";
-
-  display.innerHTML = `${typeJP[type]}　${endJP} 行<br>${typeEN[type]} for ${endEN}`;
-
-  // 停車駅表示
-  stations.forEach(st=>{
-    const allowed = st.getAttribute('data-types').split(',');
-    if(allowed.includes(type)){
-      st.classList.remove('pass');
-      st.classList.add('stop');
-    }else{
-      st.classList.remove('stop');
-      st.classList.add('pass');
+function updateStartEndOptions(){
+  const type = typeSelect.value;
+  startSelect.innerHTML="";
+  endSelect.innerHTML="";
+  allStartEnd.forEach(s=>{
+    const st = stations.find(sta=>sta.jp===s);
+    if(st && st.types.includes(type)){
+      const opt1 = document.createElement("option");
+      opt1.value = st.jp;
+      opt1.textContent = st.jp;
+      startSelect.appendChild(opt1);
+      const opt2 = document.createElement("option");
+      opt2.value = st.jp;
+      opt2.textContent = st.jp;
+      endSelect.appendChild(opt2);
     }
+  });
+  
+  // 終着制限
+  if(type==="Rapid") endSelect.querySelectorAll("option").forEach(o=>{
+    if(stations.find(sta=>sta.jp===o.value).code>"OB-16") o.disabled=true;
+  });
+  if(type==="Airport") endSelect.querySelectorAll("option").forEach(o=>{
+    if(stations.find(sta=>sta.jp===o.value).code>"OB-10") o.disabled=true;
+  });
+}
+
+typeSelect.addEventListener("change", updateStartEndOptions);
+summerCheck.addEventListener("change",()=>{routeDisplay.innerHTML="";errorMsg.textContent="";});
+updateStartEndOptions();
+
+enterBtn.addEventListener("click",()=>{
+  errorMsg.textContent="";
+  routeDisplay.innerHTML="";
+  const type = typeSelect.value;
+  const start = startSelect.value;
+  const end = endSelect.value;
+  if(!start || !end){
+    errorMsg.textContent="設定が間違っています。やり直してください / Invalid selection";
+    return;
+  }
+  const startIndex = stations.findIndex(s=>s.jp===start);
+  const endIndex = stations.findIndex(s=>s.jp===end);
+  if(startIndex>endIndex){
+    errorMsg.textContent="設定が間違っています。やり直してください / Invalid selection";
+    return;
+  }
+  
+  const summer = summerCheck.checked;
+  const subStations = stations.slice(startIndex,endIndex+1);
+  
+  subStations.forEach(s=>{
+    let isStop = s.types.includes(type);
+    if(s.jp==="舞子台" && summer && type==="Express") isStop=true;
+    const div = document.createElement("div");
+    div.className="station "+(isStop?"stop":"pass");
+    div.innerHTML=`<div class="code">${s.code}</div><div class="jp">${s.jp}</div><div class="en">${s.en}</div>`;
+    routeDisplay.appendChild(div);
   });
 });
 </script>
 
 </body>
-</html>
-</body>
-
 </html>
